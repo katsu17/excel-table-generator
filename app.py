@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template_string, send_file, url_for
+from flask import Flask, request, render_template_string, send_file, jsonify, url_for
 from PIL import Image
 import os
 
@@ -6,7 +6,7 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads/'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# HTML テンプレート
+# HTMLテンプレート
 template = """
 <!DOCTYPE html>
 <html lang="en">
@@ -34,8 +34,8 @@ template = """
             .then(response => response.json())
             .then(data => {
                 if (data.compressed_image_url) {
-                    const link = document.getElementById('compressed_image_link');
-                    link.href = data.compressed_image_url;
+                    const downloadLink = document.getElementById('compressed_image_link');
+                    downloadLink.href = data.compressed_image_url;
                     document.getElementById('compressed_image_section').style.display = 'block';
                 }
             })
@@ -90,7 +90,7 @@ def index():
             image = request.files["image"]
             if image:
                 compressed_image = compress_image(image)
-                compressed_image_url = url_for('download_file', filename=compressed_image)
+                compressed_image_url = url_for('download_file', filename=compressed_image, _external=True)
 
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return jsonify({'compressed_image': compressed_image, 'compressed_image_url': compressed_image_url})
@@ -123,5 +123,5 @@ def compress_image(image):
 def download_file(filename):
     return send_file(os.path.join(app.config['UPLOAD_FOLDER'], filename), as_attachment=True)
 
-if __name__ == "__main__":
-    app.run(debug=True)
+# Vercelのエントリーポイント
+app = app
